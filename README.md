@@ -109,3 +109,4 @@ The site connects to the AquaticMotiv Shopify store via the Storefront API. Prod
 
 All content lives as JSON in `src/data/`. Guides additionally have MDX files in `src/data/guides/content/`. Adding a new entry to a JSON file automatically generates its route and sitemap entry.
 # SaveAFishWorks
+# SaveAFishWorks
