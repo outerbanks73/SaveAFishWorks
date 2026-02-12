@@ -5,6 +5,7 @@ import { useConfigurator } from "@/context/ConfiguratorContext";
 import { formatPrice } from "@/lib/utils/format";
 import { createShopifyCart } from "@/lib/shopify/actions";
 import { CATEGORY_INFO } from "@/types/aquascaping";
+import { CompatibilityPanel } from "./CompatibilityPanel";
 
 const STYLE_LABELS: Record<string, string> = {
   nature: "Nature",
@@ -73,6 +74,11 @@ export function ConfigurationSummary() {
       >
         <h2 className="text-sm font-semibold uppercase tracking-wide text-ocean-900/60">
           {state.configurationName || "Your Build"}
+          {computed.totalItems > 0 && (
+            <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-aqua-500 px-1.5 text-[10px] font-bold text-white">
+              {computed.totalItems}
+            </span>
+          )}
         </h2>
         <span className="text-ocean-900/40">
           {isCollapsed ? (
@@ -107,6 +113,9 @@ export function ConfigurationSummary() {
             )}
           </div>
 
+          {/* Compatibility Panel */}
+          <CompatibilityPanel />
+
           {/* Required category warnings */}
           {missingRequired.length > 0 && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
@@ -131,8 +140,8 @@ export function ConfigurationSummary() {
             </div>
           ) : (
             <div className="space-y-3">
-              {categoryEntries.map(([category, items]) => (
-                <div key={category}>
+              {categoryEntries.map(([category, items], index) => (
+                <div key={category} className={index > 0 ? "border-t border-gray-50 pt-3" : ""}>
                   <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-ocean-900/40">
                     {category}
                   </p>

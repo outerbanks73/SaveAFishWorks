@@ -47,9 +47,12 @@ export function CategorySidebar({ categories }: Props) {
         return (
           <button
             key={cat.name}
-            onClick={() =>
-              dispatch({ type: "SET_ACTIVE_CATEGORY", category: cat.name })
-            }
+            onClick={() => {
+              dispatch({ type: "SET_ACTIVE_CATEGORY", category: cat.name });
+              document
+                .getElementById("product-grid")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
             className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
               isActive
                 ? "bg-aqua-50 font-semibold text-aqua-800"

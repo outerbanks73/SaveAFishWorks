@@ -8,7 +8,7 @@ export function TankSetup() {
   const { state, dispatch } = useConfigurator();
 
   return (
-    <div className="space-y-4">
+    <div id="tank-setup" className="space-y-4">
       {/* Configuration Name */}
       <div className="rounded-lg border border-aqua-100 bg-white p-4">
         <label
@@ -64,7 +64,7 @@ export function TankSetup() {
 
         {/* Custom Dimensions */}
         {state.tank?.gallons === 0 && (
-          <div className="mt-3 grid grid-cols-3 gap-3">
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row">
             <div>
               <label className="mb-1 block text-xs text-ocean-900/50">
                 Length (in)

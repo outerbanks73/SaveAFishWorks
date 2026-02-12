@@ -6,6 +6,8 @@ import {
   useReducer,
   useMemo,
   useCallback,
+  useEffect,
+  useRef,
   type ReactNode,
 } from "react";
 import type {
@@ -18,6 +20,11 @@ import type {
   AquascapeStyle,
 } from "@/types/configurator";
 import type { ShopifyProduct } from "@/types/shopify";
+import {
+  saveConfiguration,
+  loadConfiguration as loadSavedConfiguration,
+  clearSavedConfiguration,
+} from "@/lib/storage/configurator-storage";
 
 function configuratorReducer(
   state: ConfiguratorState,
@@ -78,6 +85,7 @@ function configuratorReducer(
       return { ...state, activeCategory: action.category };
 
     case "CLEAR_ALL":
+      clearSavedConfiguration();
       return {
         ...state,
         tank: null,
@@ -135,6 +143,30 @@ const ConfiguratorContext = createContext<ConfiguratorContextValue | null>(null)
 
 export function ConfiguratorProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(configuratorReducer, initialState);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load saved configuration on mount
+  useEffect(() => {
+    const saved = loadSavedConfiguration();
+    if (saved && saved.items.length > 0) {
+      dispatch({ type: "LOAD_CONFIGURATION", state: saved });
+    }
+  }, []);
+
+  // Auto-save with 500ms debounce
+  useEffect(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+    }
+    saveTimerRef.current = setTimeout(() => {
+      saveConfiguration(state);
+    }, 500);
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, [state]);
 
   const computed = useMemo<ConfiguratorComputed>(() => {
     const totalItems = state.items.reduce(

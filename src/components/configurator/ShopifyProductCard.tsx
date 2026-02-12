@@ -22,7 +22,7 @@ export function ShopifyProductCard({ product }: Props) {
   const inCart = state.items.find((i) => i.product.id === product.id);
 
   return (
-    <div className="group flex flex-col rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md">
+    <div className="group flex flex-col rounded-lg border border-gray-200 bg-white transition-all duration-200 hover:scale-[1.02] hover:shadow-md">
       {/* Image */}
       <div className="relative aspect-square overflow-hidden rounded-t-lg bg-gray-50">
         {product.image ? (
@@ -41,7 +41,7 @@ export function ShopifyProductCard({ product }: Props) {
 
         {/* Out of stock overlay */}
         {!product.availableForSale && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/70">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm">
             <span className="rounded-full bg-gray-800 px-2 py-1 text-xs font-medium text-white">
               Out of Stock
             </span>

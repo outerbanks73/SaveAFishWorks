@@ -117,7 +117,11 @@ export function ShopifyProductGrid({ products }: Props) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <div
+          id="product-grid"
+          key={state.activeCategory ?? "all"}
+          className="grid grid-cols-2 gap-3 transition-opacity duration-200 md:grid-cols-3"
+        >
           {filtered.map((product) => (
             <ShopifyProductCard key={product.id} product={product} />
           ))}
