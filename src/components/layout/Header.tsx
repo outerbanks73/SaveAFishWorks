@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { UserMenu } from "./UserMenu";
+import { NotificationBell } from "./NotificationBell";
+import { HeaderSearch } from "@/components/search/HeaderSearch";
 
 const NAV_LINKS = [
   { label: "Configurator", href: "/configurator" },
@@ -28,6 +31,11 @@ export function Header() {
             </Link>
           ))}
         </nav>
+        <div className="flex items-center gap-3">
+          <HeaderSearch />
+          <NotificationBell />
+          <UserMenu />
+        </div>
       </div>
     </header>
   );

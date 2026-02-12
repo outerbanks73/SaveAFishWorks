@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useSession } from "next-auth/react";
 import { useConfigurator } from "@/context/ConfiguratorContext";
 import { formatPrice } from "@/lib/utils/format";
 import { createShopifyCart } from "@/lib/shopify/actions";
@@ -18,10 +19,12 @@ const STYLE_LABELS: Record<string, string> = {
 
 export function ConfigurationSummary() {
   const { state, dispatch, computed } = useConfigurator();
+  const { data: session } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   function handleCheckout() {
     setError(null);
@@ -210,6 +213,35 @@ export function ConfigurationSummary() {
               <div className="mt-2 rounded-md bg-red-50 p-2 text-xs text-red-600">
                 {error}
               </div>
+            )}
+
+            {session && state.items.length > 0 && (
+              <button
+                onClick={async () => {
+                  setSaveStatus("saving");
+                  const method = state.saveId ? "PUT" : "POST";
+                  const url = state.saveId ? `/api/configurations/${state.saveId}` : "/api/configurations";
+                  const res = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: state.configurationName, data: state }),
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    if (!state.saveId) {
+                      dispatch({ type: "LOAD_CONFIGURATION", state: { ...state, saveId: data.configuration.id } });
+                    }
+                    setSaveStatus("saved");
+                    setTimeout(() => setSaveStatus("idle"), 2000);
+                  } else {
+                    setSaveStatus("idle");
+                  }
+                }}
+                disabled={saveStatus === "saving"}
+                className="mt-3 w-full rounded-lg border border-aqua-300 bg-aqua-50 py-2.5 text-sm font-semibold text-aqua-700 transition-colors hover:bg-aqua-100 disabled:opacity-50"
+              >
+                {saveStatus === "saving" ? "Saving..." : saveStatus === "saved" ? "Saved!" : state.saveId ? "Update Save" : "Save to Account"}
+              </button>
             )}
 
             <button

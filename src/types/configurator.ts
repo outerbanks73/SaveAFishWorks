@@ -34,6 +34,7 @@ export interface ConfiguratorState {
   items: ConfiguratorItem[];
   activeCategory: string | null;
   configurationName: string;
+  saveId?: string;
 }
 
 export type ConfiguratorAction =
