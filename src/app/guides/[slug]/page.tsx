@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CareGuidePage } from "@/components/templates/CareGuidePage";
 import { getGuideBySlug, getGuideSlugs } from "@/lib/data/guides";
-import { getGuideContent } from "@/lib/utils/mdx";
+import { getGuideBody } from "@/lib/data/guide-content";
 import { generatePageMetadata } from "@/lib/seo/metadata";
 
 interface Props {
@@ -10,12 +10,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getGuideSlugs().map((slug) => ({ slug }));
+  const slugs = await getGuideSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const guide = getGuideBySlug(slug);
+  const guide = await getGuideBySlug(slug);
   if (!guide) return {};
 
   return generatePageMetadata({
@@ -70,10 +71,10 @@ function mdxToHtml(mdx: string): {
 
 export default async function GuideRoute({ params }: Props) {
   const { slug } = await params;
-  const guide = getGuideBySlug(slug);
+  const guide = await getGuideBySlug(slug);
   if (!guide) notFound();
 
-  const content = getGuideContent(slug);
+  const content = await getGuideBody(slug);
   const { html, headings } = mdxToHtml(content);
 
   return <CareGuidePage guide={guide} contentHtml={html} headings={headings} />;

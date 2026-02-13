@@ -12,8 +12,8 @@ export const metadata: Metadata = generatePageMetadata({
   path: "/compare",
 });
 
-export default function CompareHubPage() {
-  const comparisons = getAllComparisons();
+export default async function CompareHubPage() {
+  const comparisons = await getAllComparisons();
   const breadcrumbs = buildBreadcrumbs([
     { label: "Compare", href: "/compare" },
   ]);

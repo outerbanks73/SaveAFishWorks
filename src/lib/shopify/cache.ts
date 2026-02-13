@@ -3,6 +3,7 @@ import type { ShopifyProduct, StorefrontProductsResponse } from "@/types/shopify
 import { shopifyFetch, hasShopifyCredentials } from "./client";
 import { PRODUCTS_QUERY } from "./queries";
 import { normalizeProduct } from "./normalize";
+import { prisma } from "@/lib/db";
 
 async function fetchAllProducts(): Promise<ShopifyProduct[]> {
   if (!hasShopifyCredentials()) {
@@ -38,8 +39,40 @@ async function fetchAllProducts(): Promise<ShopifyProduct[]> {
   }
 }
 
+async function applyOverrides(products: ShopifyProduct[]): Promise<ShopifyProduct[]> {
+  try {
+    const overrides = await prisma.shopifyProductOverride.findMany();
+    if (overrides.length === 0) return products;
+
+    const overrideMap = new Map(overrides.map((o) => [o.shopifyProductId, o]));
+
+    return products
+      .filter((p) => {
+        const override = overrideMap.get(p.id);
+        return !override?.isHidden;
+      })
+      .map((p) => {
+        const override = overrideMap.get(p.id);
+        if (override?.categoryOverride) {
+          return { ...p, category: override.categoryOverride };
+        }
+        return p;
+      })
+      .sort((a, b) => {
+        const oa = overrideMap.get(a.id)?.sortOrder ?? 0;
+        const ob = overrideMap.get(b.id)?.sortOrder ?? 0;
+        return oa - ob;
+      });
+  } catch {
+    return products;
+  }
+}
+
 export const getAllShopifyProducts = unstable_cache(
-  fetchAllProducts,
+  async () => {
+    const raw = await fetchAllProducts();
+    return applyOverrides(raw);
+  },
   ["shopify-products"],
   { revalidate: 86400 } // 24 hours
 );

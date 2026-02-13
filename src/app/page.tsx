@@ -18,9 +18,14 @@ const CATEGORIES = [
 ];
 
 export default async function HomePage() {
-  const fish = getAllFish().slice(0, 6);
-  const guides = getAllGuides().slice(0, 4);
-  const lists = getAllCurationLists().slice(0, 3);
+  const [allFish, allGuides, allLists] = await Promise.all([
+    getAllFish(),
+    getAllGuides(),
+    getAllCurationLists(),
+  ]);
+  const fish = allFish.slice(0, 6);
+  const guides = allGuides.slice(0, 4);
+  const lists = allLists.slice(0, 3);
 
   const session = await auth();
   let userTanks: Array<{ id: string; name: string; gallons: number }> = [];

@@ -2,8 +2,13 @@
 
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center px-4">
       <div className="w-full rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
@@ -16,7 +21,7 @@ export default function LoginPage() {
 
         <div className="space-y-3">
           <button
-            onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("google", { callbackUrl })}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -41,7 +46,7 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
+            onClick={() => signIn("facebook", { callbackUrl })}
             className="flex w-full items-center justify-center gap-3 rounded-lg bg-[#1877F2] px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-[#166FE5]"
           >
             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -63,5 +68,13 @@ export default function LoginPage() {
         &larr; Back to home
       </Link>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

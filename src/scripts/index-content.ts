@@ -23,7 +23,7 @@ async function main() {
   }> = [];
 
   // Fish
-  const fish = getAllFish();
+  const fish = await getAllFish();
   for (const f of fish) {
     documents.push({
       id: `fish-${f.slug}`,
@@ -39,7 +39,7 @@ async function main() {
   console.log(`Prepared ${fish.length} fish documents`);
 
   // Guides
-  const guides = getAllGuides();
+  const guides = await getAllGuides();
   for (const g of guides) {
     documents.push({
       id: `guide-${g.slug}`,
@@ -56,7 +56,7 @@ async function main() {
 
   // Products
   try {
-    const products = getAllProducts();
+    const products = await getAllProducts();
     for (const p of products) {
       documents.push({
         id: `product-${p.slug}`,
@@ -76,7 +76,7 @@ async function main() {
 
   // Comparisons
   try {
-    const comparisons = getAllComparisons();
+    const comparisons = await getAllComparisons();
     for (const c of comparisons) {
       documents.push({
         id: `comparison-${c.slug}`,
@@ -94,7 +94,7 @@ async function main() {
 
   // Curation lists
   try {
-    const lists = getAllCurationLists();
+    const lists = await getAllCurationLists();
     for (const l of lists) {
       documents.push({
         id: `curation-${l.slug}`,
@@ -112,7 +112,7 @@ async function main() {
 
   // Glossary
   try {
-    const terms = getAllGlossaryTerms();
+    const terms = await getAllGlossaryTerms();
     for (const t of terms) {
       documents.push({
         id: `glossary-${t.slug}`,

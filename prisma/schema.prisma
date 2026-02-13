@@ -35,6 +35,12 @@ model User {
   notifications       Notification[]
   pushSubscriptions   PushSubscription[]
   savedConfigurations SavedConfiguration[]
+  guides              Guide[]
+  fishSpecies         FishSpecies[]
+  contentProducts     ContentProduct[]
+  glossaryTerms       GlossaryTerm[]
+  comparisons         Comparison[]
+  curationLists       CurationList[]
 }
 
 model Account {
@@ -303,4 +309,201 @@ model AdminProduct {
   metadata         Json?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// Content models
+// ──────────────────────────────────────────────
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Guide {
+  id                   String        @id @default(cuid())
+  slug                 String        @unique
+  title                String
+  description          String
+  category             String
+  author               String
+  bodyMarkdown         String        @db.Text
+  readingTime          String
+  image                String?
+  status               ContentStatus @default(DRAFT)
+  publishedAt          DateTime?
+  relatedGuides        String[]
+  relatedFish          String[]
+  relatedProducts      String[]
+  relatedGlossaryTerms String[]
+  faqs                 Json?
+  createdById          String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+model FishSpecies {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  commonName       String
+  scientificName   String
+  family           String
+  origin           String
+  description      String        @db.Text
+  image            String?
+  difficulty       String
+  temperament      String
+  diet             String
+  lifespan         String
+  size             String
+  tankSize         String
+  temperature      String
+  ph               String
+  hardness         String
+  waterType        String
+  careNotes        String        @db.Text
+  compatibleWith   String[]
+  incompatibleWith String[]
+  relatedGuides    String[]
+  relatedProducts  String[]
+  faqs             Json?
+  status           ContentStatus @default(DRAFT)
+  createdById      String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+model ContentProduct {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  name            String
+  category        String
+  brand           String
+  description     String        @db.Text
+  price           Float
+  originalPrice   Float?
+  rating          Float
+  reviewCount     Int
+  image           String?
+  features        String[]
+  pros            String[]
+  cons            String[]
+  specifications  Json?
+  inStock         Boolean       @default(true)
+  bestFor         String[]
+  relatedProducts String[]
+  relatedGuides   String[]
+  relatedFish     String[]
+  status          ContentStatus @default(DRAFT)
+  createdById     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+model GlossaryTerm {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  term            String
+  definition      String        @db.Text
+  longDescription String        @db.Text
+  category        String
+  relatedTerms    String[]
+  relatedGuides   String[]
+  relatedFish     String[]
+  faqs            Json?
+  status          ContentStatus @default(DRAFT)
+  createdById     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+model Comparison {
+  id                 String        @id @default(cuid())
+  slug               String        @unique
+  title              String
+  description        String        @db.Text
+  image              String?
+  optionA            Json
+  optionB            Json
+  criteria           Json
+  verdict            String        @db.Text
+  relatedComparisons String[]
+  relatedGuides      String[]
+  faqs               Json?
+  status             ContentStatus @default(DRAFT)
+  createdById        String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+model CurationList {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  title          String
+  description    String        @db.Text
+  intro          String        @db.Text
+  image          String?
+  items          Json
+  relatedLists   String[]
+  relatedGuides  String[]
+  targetPersonas String[]
+  faqs           Json?
+  status         ContentStatus @default(DRAFT)
+  createdById    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+// ──────────────────────────────────────────────
+// Configurator management models
+// ──────────────────────────────────────────────
+
+model ShopifyProductOverride {
+  id               String  @id @default(cuid())
+  shopifyProductId String  @unique
+  categoryOverride String?
+  isHidden         Boolean @default(false)
+  sortOrder        Int?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ConfiguratorTemplate {
+  id                String  @id @default(cuid())
+  templateId        String  @unique
+  name              String
+  description       String  @db.Text
+  style             String
+  tankId            String
+  difficulty        String
+  shopifyProductIds String[]
+  isActive          Boolean @default(true)
+  sortOrder         Int     @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CategoryConfig {
+  id           String  @id @default(cuid())
+  name         String  @unique
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+  icon         String?
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

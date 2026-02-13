@@ -12,8 +12,8 @@ export const metadata: Metadata = generatePageMetadata({
   path: "/guides",
 });
 
-export default function GuidesHubPage() {
-  const guides = getAllGuides();
+export default async function GuidesHubPage() {
+  const guides = await getAllGuides();
   const breadcrumbs = buildBreadcrumbs([
     { label: "Guides", href: "/guides" },
   ]);

@@ -12,8 +12,8 @@ export const metadata: Metadata = generatePageMetadata({
   path: "/best",
 });
 
-export default function BestOfHubPage() {
-  const lists = getAllCurationLists();
+export default async function BestOfHubPage() {
+  const lists = await getAllCurationLists();
   const breadcrumbs = buildBreadcrumbs([
     { label: "Best Of", href: "/best" },
   ]);

@@ -13,12 +13,12 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getProductSlugs();
+  return await getProductSlugs();
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return {};
 
   return generatePageMetadata({
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { category, slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product || product.category !== category) notFound();
 
   const cat = getCategoryBySlug(category);

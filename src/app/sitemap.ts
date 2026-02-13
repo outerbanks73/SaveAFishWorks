@@ -10,7 +10,7 @@ import { getComparisonSlugs } from "@/lib/data/comparisons";
 
 const BASE_URL = "https://learn.aquaticmotiv.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
     { url: BASE_URL, changeFrequency: "weekly" as const, priority: 1.0 },
     { url: `${BASE_URL}/glossary`, changeFrequency: "weekly" as const, priority: 0.8 },
@@ -24,19 +24,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/examples`, changeFrequency: "monthly" as const, priority: 0.7 },
   ];
 
-  const glossaryPages = getGlossaryTermSlugs().map((slug) => ({
+  const [glossarySlugs, fishSlugsArr, guideSlugsArr, productSlugsArr, curationSlugsArr, personaSlugsArr, exampleSlugsArr, comparisonSlugsArr] = await Promise.all([
+    getGlossaryTermSlugs(),
+    getFishSlugs(),
+    getGuideSlugs(),
+    getProductSlugs(),
+    getCurationListSlugs(),
+    getPersonaSlugs(),
+    getExampleGallerySlugs(),
+    getComparisonSlugs(),
+  ]);
+
+  const glossaryPages = glossarySlugs.map((slug) => ({
     url: `${BASE_URL}/glossary/${slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  const fishPages = getFishSlugs().map((slug) => ({
+  const fishPages = fishSlugsArr.map((slug) => ({
     url: `${BASE_URL}/fish/${slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
-  const guidePages = getGuideSlugs().map((slug) => ({
+  const guidePages = guideSlugsArr.map((slug) => ({
     url: `${BASE_URL}/guides/${slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.8,
@@ -48,31 +59,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const productPages = getProductSlugs().map(({ category, slug }) => ({
+  const productPages = productSlugsArr.map(({ category, slug }) => ({
     url: `${BASE_URL}/products/${category}/${slug}`,
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
 
-  const curationPages = getCurationListSlugs().map((slug) => ({
+  const curationPages = curationSlugsArr.map((slug) => ({
     url: `${BASE_URL}/best/${slug}`,
     changeFrequency: "weekly" as const,
     priority: 0.8,
   }));
 
-  const personaPages = getPersonaSlugs().map((slug) => ({
+  const personaPages = personaSlugsArr.map((slug) => ({
     url: `${BASE_URL}/for/${slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  const examplePages = getExampleGallerySlugs().map((slug) => ({
+  const examplePages = exampleSlugsArr.map((slug) => ({
     url: `${BASE_URL}/examples/${slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  const comparisonPages = getComparisonSlugs().map((slug) => ({
+  const comparisonPages = comparisonSlugsArr.map((slug) => ({
     url: `${BASE_URL}/compare/${slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.7,

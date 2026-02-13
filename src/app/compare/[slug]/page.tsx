@@ -12,12 +12,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getComparisonSlugs().map((slug) => ({ slug }));
+  const slugs = await getComparisonSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const comparison = getComparisonBySlug(slug);
+  const comparison = await getComparisonBySlug(slug);
   if (!comparison) return {};
 
   return generatePageMetadata({
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ComparisonRoute({ params }: Props) {
   const { slug } = await params;
-  const comparison = getComparisonBySlug(slug);
+  const comparison = await getComparisonBySlug(slug);
   if (!comparison) notFound();
 
   return <ComparisonPage comparison={comparison} />;

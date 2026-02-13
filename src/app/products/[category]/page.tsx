@@ -35,7 +35,7 @@ export default async function ProductCategoryPage({ params }: Props) {
   const cat = getCategoryBySlug(category);
   if (!cat) notFound();
 
-  const products = getProductsByCategory(category);
+  const products = await getProductsByCategory(category);
   const breadcrumbs = buildBreadcrumbs([
     { label: "Products", href: "/products" },
     { label: cat.name, href: `/products/${category}` },

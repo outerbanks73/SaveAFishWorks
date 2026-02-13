@@ -12,8 +12,8 @@ export const metadata: Metadata = generatePageMetadata({
   path: "/glossary",
 });
 
-export default function GlossaryHubPage() {
-  const terms = getAllGlossaryTerms();
+export default async function GlossaryHubPage() {
+  const terms = await getAllGlossaryTerms();
   const breadcrumbs = buildBreadcrumbs([
     { label: "Glossary", href: "/glossary" },
   ]);

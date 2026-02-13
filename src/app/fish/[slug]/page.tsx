@@ -9,12 +9,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getFishSlugs().map((slug) => ({ slug }));
+  const slugs = await getFishSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const fish = getFishBySlug(slug);
+  const fish = await getFishBySlug(slug);
   if (!fish) return {};
 
   return generatePageMetadata({
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function FishProfileRoute({ params }: Props) {
   const { slug } = await params;
-  const fish = getFishBySlug(slug);
+  const fish = await getFishBySlug(slug);
   if (!fish) notFound();
 
   return <FishProfilePage fish={fish} />;

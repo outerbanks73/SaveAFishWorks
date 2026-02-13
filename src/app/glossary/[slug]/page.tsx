@@ -12,12 +12,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getGlossaryTermSlugs().map((slug) => ({ slug }));
+  const slugs = await getGlossaryTermSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const term = getGlossaryTermBySlug(slug);
+  const term = await getGlossaryTermBySlug(slug);
   if (!term) return {};
 
   return generatePageMetadata({
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function GlossaryTermRoute({ params }: Props) {
   const { slug } = await params;
-  const term = getGlossaryTermBySlug(slug);
+  const term = await getGlossaryTermBySlug(slug);
   if (!term) notFound();
 
   return <GlossaryTermPage term={term} />;

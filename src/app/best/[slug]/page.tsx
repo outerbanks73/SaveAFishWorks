@@ -12,12 +12,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return getCurationListSlugs().map((slug) => ({ slug }));
+  const slugs = await getCurationListSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const list = getCurationListBySlug(slug);
+  const list = await getCurationListBySlug(slug);
   if (!list) return {};
 
   return generatePageMetadata({
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CurationListRoute({ params }: Props) {
   const { slug } = await params;
-  const list = getCurationListBySlug(slug);
+  const list = await getCurationListBySlug(slug);
   if (!list) notFound();
 
   return <CurationListPage list={list} />;

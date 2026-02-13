@@ -14,8 +14,8 @@ export const metadata: Metadata = generatePageMetadata({
   path: "/fish",
 });
 
-export default function FishHubPage() {
-  const fish = getAllFish();
+export default async function FishHubPage() {
+  const fish = await getAllFish();
   const breadcrumbs = buildBreadcrumbs([{ label: "Fish", href: "/fish" }]);
 
   return (
