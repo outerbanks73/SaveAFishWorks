@@ -1,13 +1,20 @@
-const domain = process.env.SHOPIFY_STORE_DOMAIN ?? "";
-const token = process.env.SHOPIFY_STOREFRONT_TOKEN ?? "";
+function getDomain() {
+  return process.env.SHOPIFY_STORE_DOMAIN ?? "";
+}
 
-const endpoint = `https://${domain}/api/2026-01/graphql.json`;
+function getToken() {
+  return process.env.SHOPIFY_STOREFRONT_TOKEN ?? "";
+}
 
 export function hasShopifyCredentials(): boolean {
-  return domain.length > 0 && token.length > 0;
+  return getDomain().length > 0 && getToken().length > 0;
 }
 
 export async function shopifyFetch<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
+  const domain = getDomain();
+  const token = getToken();
+  const endpoint = `https://${domain}/api/2026-01/graphql.json`;
+
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {

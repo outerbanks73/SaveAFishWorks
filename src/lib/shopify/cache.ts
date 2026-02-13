@@ -6,28 +6,36 @@ import { normalizeProduct } from "./normalize";
 
 async function fetchAllProducts(): Promise<ShopifyProduct[]> {
   if (!hasShopifyCredentials()) {
+    console.log("[Shopify] No credentials found, using seed data");
     const seed = await import("@/data/shopify-seed.json");
     return seed.default as ShopifyProduct[];
   }
 
-  const products: ShopifyProduct[] = [];
-  let hasNextPage = true;
-  let cursor: string | null = null;
+  try {
+    const products: ShopifyProduct[] = [];
+    let hasNextPage = true;
+    let cursor: string | null = null;
 
-  while (hasNextPage) {
-    const res: StorefrontProductsResponse = await shopifyFetch<StorefrontProductsResponse>(PRODUCTS_QUERY, {
-      first: 250,
-      after: cursor,
-    });
+    while (hasNextPage) {
+      const res: StorefrontProductsResponse = await shopifyFetch<StorefrontProductsResponse>(PRODUCTS_QUERY, {
+        first: 250,
+        after: cursor,
+      });
 
-    const edges = res.data.products.edges;
-    products.push(...edges.map(normalizeProduct));
+      const edges = res.data.products.edges;
+      products.push(...edges.map(normalizeProduct));
 
-    hasNextPage = res.data.products.pageInfo.hasNextPage;
-    cursor = res.data.products.pageInfo.endCursor;
+      hasNextPage = res.data.products.pageInfo.hasNextPage;
+      cursor = res.data.products.pageInfo.endCursor;
+    }
+
+    console.log(`[Shopify] Fetched ${products.length} products from Storefront API`);
+    return products;
+  } catch (error) {
+    console.error("[Shopify] API failed, falling back to seed data:", error);
+    const seed = await import("@/data/shopify-seed.json");
+    return seed.default as ShopifyProduct[];
   }
-
-  return products;
 }
 
 export const getAllShopifyProducts = unstable_cache(
