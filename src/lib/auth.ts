@@ -41,19 +41,24 @@ if (process.env.NODE_ENV === "development") {
         const email = credentials?.email as string | undefined;
         if (!email) return null;
 
-        // Find or create the user
-        let user = await prisma.user.findUnique({ where: { email } });
-        if (!user) {
-          user = await prisma.user.create({
-            data: {
-              email,
-              name: email.split("@")[0],
-              role: "ADMIN",
-            },
-          });
+        try {
+          // Try to find or create the user in DB
+          let user = await prisma.user.findUnique({ where: { email } });
+          if (!user) {
+            user = await prisma.user.create({
+              data: {
+                email,
+                name: email.split("@")[0],
+                role: "ADMIN",
+              },
+            });
+          }
+          return { id: user.id, email: user.email, name: user.name, role: user.role };
+        } catch (err) {
+          // DB not available — return a mock user so dev login still works
+          console.warn("[auth] DB unavailable, using mock dev user:", err);
+          return { id: "dev-user", email, name: email.split("@")[0], role: "ADMIN" };
         }
-
-        return { id: user.id, email: user.email, name: user.name, role: user.role };
       },
     }),
   );
@@ -73,6 +78,8 @@ const useAdapter = hasOAuthProvider;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret,
+  trustHost: true,
+  debug: process.env.NODE_ENV === "development",
   ...(useAdapter ? { adapter: PrismaAdapter(prisma) } : {}),
   providers,
   session: {
@@ -92,8 +99,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token, user }) {
       if (session.user) {
-        // JWT strategy: read from token
-        // Database strategy: read from user
         if (token) {
           session.user.id = token.id as string;
           session.user.role = (token.role as string) ?? "HOBBYIST";
