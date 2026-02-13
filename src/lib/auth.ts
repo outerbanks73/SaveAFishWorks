@@ -7,6 +7,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
 
 const providers: Provider[] = [];
+let hasOAuthProvider = false;
 
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   providers.push(
@@ -15,6 +16,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   );
+  hasOAuthProvider = true;
 }
 
 if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
@@ -24,6 +26,7 @@ if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     }),
   );
+  hasOAuthProvider = true;
 }
 
 // Dev-only credentials provider — sign in with any email, no OAuth setup needed.
@@ -64,13 +67,16 @@ const secret =
     ? "dev-secret-do-not-use-in-production"
     : undefined);
 
+// NextAuth v5 does not allow Credentials provider with a database adapter.
+// Use the adapter only when OAuth providers are configured; otherwise use pure JWT.
+const useAdapter = hasOAuthProvider;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret,
-  adapter: PrismaAdapter(prisma),
+  ...(useAdapter ? { adapter: PrismaAdapter(prisma) } : {}),
   providers,
   session: {
-    // Credentials provider requires JWT strategy (no DB session created on authorize)
-    strategy: process.env.NODE_ENV === "development" ? "jwt" : "database",
+    strategy: useAdapter ? "database" : "jwt",
   },
   pages: {
     signIn: "/auth/login",
@@ -86,8 +92,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token, user }) {
       if (session.user) {
-        // JWT strategy (dev): read from token
-        // Database strategy (prod): read from user
+        // JWT strategy: read from token
+        // Database strategy: read from user
         if (token) {
           session.user.id = token.id as string;
           session.user.role = (token.role as string) ?? "HOBBYIST";
