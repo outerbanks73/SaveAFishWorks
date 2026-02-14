@@ -18,9 +18,41 @@ See `docs/` for vision, PRD, roadmap, competitive research, architecture, and se
 - `npm run dev` — Start development server
 - `npm run build` — Production build (also validates all static routes)
 - `npm run lint` — Run ESLint
+- `npm run setup` — One-time setup: creates env files, generates Prisma client, pushes schema to DB
 - `npm start` — Serve production build
 
 No test framework is configured.
+
+## Dev Setup & Workflow
+
+**After cloning or pulling:**
+1. `npm install` — installs deps and auto-runs `postinstall` (creates `.env` + `.env.local` from `.env.example` if missing, generates Prisma client)
+2. Add Google OAuth credentials to `.env.local` (one-time per machine — `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`)
+3. `npm run setup` — pushes Prisma schema to PostgreSQL (requires PostgreSQL running)
+4. `npm run dev` — start the dev server
+
+**What `postinstall` automates** (runs on every `npm install`, including after `git pull`):
+- Creates `.env` and `.env.local` from `.env.example` if they don't exist
+- Auto-detects macOS username for `DATABASE_URL`
+- Generates a random `AUTH_SECRET`
+- Merges any NEW env vars from `.env.example` into existing env files (preserves your values)
+- Runs `npx prisma generate`
+
+**Environment files** (both gitignored):
+- `.env` — read by Prisma CLI (`DATABASE_URL`)
+- `.env.local` — read by Next.js (all vars including auth, Shopify, Google OAuth)
+
+**Authentication:** Google OAuth only. Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env.local`. Redirect URI in Google Console: `http://localhost:3000/api/auth/callback/google`.
+
+**Database:** PostgreSQL on localhost. On macOS use Homebrew: `brew install postgresql@17 && brew services start postgresql@17 && createdb saveafishworks`.
+
+**Deployment target:** Hetzner VPS (not Vercel).
+
+## Workflow Preferences
+
+- **Automate everything possible via `git pull` + `npm install`.** Setup scripts, postinstall hooks, and env file generation should handle configuration. The only manual step should be adding secrets (Google OAuth credentials) once per machine.
+- **Keep auth simple.** Google OAuth with PrismaAdapter, no conditional logic, no dev-only workarounds.
+- **Secrets stay in `.env.local`** — never committed to git. `.env.example` is the template.
 
 ## Architecture
 
