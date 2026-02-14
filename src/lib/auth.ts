@@ -73,13 +73,15 @@ const secret =
     : undefined);
 
 // NextAuth v5 does not allow Credentials provider with a database adapter.
-// Use the adapter only when OAuth providers are configured; otherwise use pure JWT.
-const useAdapter = hasOAuthProvider;
+// In dev the Credentials provider is always present, so skip the adapter and use JWT.
+// In production there's no Credentials provider, so use the adapter + database sessions.
+const isDev = process.env.NODE_ENV === "development";
+const useAdapter = hasOAuthProvider && !isDev;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret,
   trustHost: true,
-  debug: process.env.NODE_ENV === "development",
+  debug: isDev,
   ...(useAdapter ? { adapter: PrismaAdapter(prisma) } : {}),
   providers,
   session: {
